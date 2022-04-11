@@ -9,6 +9,8 @@ async function main() {
     
     const { GME, MSFT, DIS, BNTX } = result;
     const stocks = [GME, MSFT, DIS, BNTX];
+
+    console.log(stocks[0].values)
 }
 
 main()

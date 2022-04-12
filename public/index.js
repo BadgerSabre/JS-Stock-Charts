@@ -5,11 +5,11 @@ async function main() {
     
     let result = await fetch('https://api.twelvedata.com/time_series?symbol=GME,MSFT,DIS,BNTX&interval=1min&apikey=ae4bf80cd848465bb15ae550fc2f5bbb')
     let resJson = await result.json()
-    console.log(resJson)
-    
     const { GME, MSFT, DIS, BNTX } = mockData;
     const stocks = [GME, MSFT, DIS, BNTX];
-
+    console.log(resJson)
+    console.log(stocks.map( value => value.values.high).sort((a,b) => parseFloat(b) - parseFloat(a))[0])
+    
     stocks.forEach( stock => stock.values.reverse())
     //Time Chart
     new Chart(timeChartCanvas.getContext('2d'), {
@@ -29,12 +29,12 @@ async function main() {
         type: 'bar',
         data: {
             labels: stocks.map(value => value.meta.symbol),
-            datasets: stocks.map( stock => ({
-                label: stock.meta.symbol,
-                data: stocks[0].values.map(value => parseFloat(value.high)),
-                backgroundColor:  getColor(stock.meta.symbol),
-                borderColor: getColor(stock.meta.symbol),
-            }))
+            datasets: [{
+                label: `Highest`,
+                data: stocks.map(value => getHighestValue(value.values)),
+                backgroundColor:  stocks.map(value => getColor(value.meta.symbol)),
+                borderColor: stocks.map(value => getColor(value.meta.symbol)),
+            }]
         }
     });
     //Average Stock Price Chart
@@ -42,12 +42,12 @@ async function main() {
         type: 'pie',
         data: {
             labels: stocks.map(value => value.meta.symbol),
-            datasets: stocks.map( stock => ({
-                label: stock.meta.symbol,
-                data: stocks[0].values.map(value => parseFloat(value.high)),
-                backgroundColor:  getColor(stock.meta.symbol),
-                borderColor: getColor(stock.meta.symbol),
-            }))
+            datasets: [{
+                label: 'Average',
+                data: stocks.map(value => getAverage(value.values)),
+                backgroundColor:  stocks.map(value => getColor(value.meta.symbol)),
+                borderColor: stocks.map(value => getColor(value.meta.symbol)),
+            }]
         }
     });
 
@@ -67,6 +67,14 @@ function getColor(stock){
     if(stock === "BNTX"){
         return 'rgba(166, 43, 158, 0.7)'
     }
+}
+
+function getHighestValue(values) {
+    return values.map(value => value.high).sort((a,b) => parseFloat(b) - parseFloat(a))[0]
+}
+
+function getAverage(values) {
+    return values.map(value => value.high).reduce((a,b) => parseFloat(a) + parseFloat(b)) / values.length
 }
 
 main()
